@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kapustin Works API</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery for AJAX -->
+</head>
+<body>
+    <!-- Registration Form -->
+    <div>
+        <h2>Register</h2>
+        <form id="registerForm">
+            <input type="text" id="registerUsername" placeholder="Username" required>
+            <input type="email" id="registerEmail" placeholder="Email" required>
+            <input type="password" id="registerPassword" placeholder="Password" required>
+            <button type="submit">Register</button>
+        </form>
+    </div>
+
+    <!-- Login Form -->
+    <div>
+        <h2>Login</h2>
+        <form id="loginForm">
+            <input type="text" id="loginUsername" placeholder="Username" required>
+            <input type="password" id="loginPassword" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+        <!-- Display Area for Works -->
+    <div id="worksDisplay">
+      <h2>Works by Kapustin</h2>
+      <ul id="worksList"></ul>
+    </div>
+
+    <!-- Buttons for Specific Actions -->
+    <div id="actions">
+      <button id="getAllWorks">Show All Works</button>
+      <button id="getByOpus">Get Work by Opus Number</button>
+      <button id="getByType">Get Works by Type</button>
+      <button id="getLargeEnsembles">Get Larger Ensemble Works</button>
+      <button id="getNoRecording">Get Works with No Recording</button>
+      <button id="getByYear">Get Works by Year</button>
+      <button id="getOneSection">Get Works With 1 Section Only</button>
+      <button id="getReferencedWorks">Get Works Referencing Other Artists</button>
+    </div>
+
+
+    <script>
+        // AJAX for Registration
+        $("#registerForm").submit(function(event) {
+            event.preventDefault();
+            $.ajax({
+                url: 'http://localhost:5000/user',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    username: $("#registerUsername").val(),
+                    email: $("#registerEmail").val(),
+                    password: $("#registerPassword").val()
+                }),
+                success: function(response) {
+                    alert('Registered successfully!');
+                },
+                error: function(error) {
+                    alert('Error registering user.');
+                }
+            });
+        });
+
+        // AJAX for Login
+        $("#loginForm").submit(function(event) {
+            event.preventDefault();
+            $.ajax({
+                url: 'http://localhost:5000/login',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    username: $("#loginUsername").val(),
+                    password: $("#loginPassword").val()
+                }),
+                success: function(response) {
+                    alert('Logged in successfully!');
+                },
+                error: function(error) {
+                    alert('Error logging in.');
+                }
+            });
+        });
+
+                // Function to display works
+        function displayWorks(works) {
+            $("#worksList").empty();  // Clear the current list
+            works.forEach(work => {
+                $("#worksList").append(`<li>${work.title} (Opus ${work.opus_id})</li>`);
+            });
+        }
+
+        // Get All Works
+        $("#getAllWorks").click(function() {
+            $.ajax({
+                url: 'http://localhost:5000/api/opus',
+                type: 'GET',
+                success: function(response) {
+                    displayWorks(response);
+                },
+                error: function(error) {
+                    alert('Error fetching all works.');
+                }
+            });
+        });
+
+        // Get Work by Opus Number (For simplicity, let's fetch Opus 1 as an example)
+        $("#getByOpus").click(function() {
+            $.ajax({
+                url: 'http://localhost:5000/api/opus/1',
+                type: 'GET',
+                success: function(response) {
+                    displayWorks([response]);  // Wrap the single work in an array for the display function
+                },
+                error: function(error) {
+                    alert('Error fetching work by opus number.');
+                }
+            });
+        });
+
+        // Get Works by Type (For simplicity, let's fetch type "Sonata" as an example)
+        $("#getByType").click(function() {
+            $.ajax({
+                url: 'http://localhost:5000/opus/filter?type=Sonata',
+                type: 'GET',
+                success: function(response) {
+                    displayWorks(response);
+                },
+                error: function(error) {
+                    alert('Error fetching works by type.');
+                }
+            });
+        });
+
+        // Get Works with -1 Instruments
+        $("#getNoInstruments").click(function() {
+            $.ajax({
+                url: 'http://localhost:5000/opus/filter?instruments=-1',
+                type: 'GET',
+                success: function(response) {
+                    displayWorks(response);
+                },
+                error: function(error) {
+                    alert('Error fetching works with -1 instruments.');
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
